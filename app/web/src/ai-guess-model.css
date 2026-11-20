@@ -1,0 +1,16 @@
+.ai-guess-model{margin-top:28px;border-top:1px solid var(--line)}
+.ai-model-dialog{color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px;width:min(620px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto}
+.ai-model-dialog::backdrop{background:rgb(15 35 27 / .45)}
+.ai-model-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.ai-model-dialog-head h2{margin:0}
+.ai-model-current{border-left:3px solid var(--green);padding-left:12px;overflow-wrap:anywhere}
+.ai-model-dialog form label:not(.ai-toggle){display:grid;gap:5px}
+.ai-model-dialog input:not([type=checkbox]){width:100%;min-width:0;font:inherit;color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.ai-model-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 12px}.ai-model-actions .primary{margin:0}
+.ai-model-dialog p{overflow-wrap:anywhere}.ai-model-dialog .hint{font-size:14px}.ai-model-dialog form>button{justify-self:start}
+@media(max-width:480px){.ai-model-dialog{padding:18px}.ai-model-dialog-head h2{font-size:20px}.ai-model-actions button{flex:1 1 auto}}
+
+.ai-task-settings{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.ai-task-settings h3{margin:0}.ai-task-row{min-width:0;margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:10px;display:grid;grid-template-columns:1fr 1.4fr;gap:12px;align-items:end}
+.ai-task-row legend{font-weight:600;padding:0 6px}.ai-task-row .ai-toggle{align-self:center}.ai-model-dialog select{font:inherit;color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px;min-width:0;width:100%}
+.ai-model-test-task{display:grid;grid-template-columns:auto minmax(120px,200px);align-items:center;gap:12px;margin-top:20px}
+@media(max-width:480px){.ai-task-row{grid-template-columns:1fr}.ai-model-dialog{max-height:calc(100dvh - 16px)}}

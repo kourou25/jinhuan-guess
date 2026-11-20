@@ -1,0 +1,30 @@
+/* Shared A isometric direction: quieter scenery, compact subjects, reachable controls. */
+.farm-pig-sprite{display:block;flex:none;width:52px;height:48px;background:url('/assets/farm/pixel-v3/animals-walk.png') 0 98%/400% 400% no-repeat;image-rendering:pixelated}
+.farm-guardian-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.farm-guardian-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 3px}.farm-guardian-card img{width:80px;height:96px;object-fit:contain;image-rendering:pixelated}.farm-guardian-card strong{font-size:12px;text-align:center;min-height:2.4em}
+.farm-map.farm-pixel{height:550px;aspect-ratio:auto;max-height:70svh;min-height:360px;background:#d0d8b8}
+.farm-pixel-background{position:absolute;inset:0;background:linear-gradient(#e5e6d57a,#e5e6d57a),url('/assets/farm/pixel-v3/environment.png') center/cover;filter:saturate(.48) contrast(.86) brightness(1.03);pointer-events:none}
+.farm-map.farm-pixel canvas{pointer-events:auto;touch-action:pan-y;filter:saturate(.76) contrast(.94);cursor:crosshair}
+.farm-pixel-camera{position:absolute;right:10px;top:10px;display:flex;gap:4px;z-index:4}
+.farm-page .farm-pixel-camera button{min-height:34px;min-width:34px;padding:3px 7px;background:#fffbeeea;border:1px solid #c4b99b}
+.farm-page.is-pixel .farm-game-shell{background:#faf7e8;border-color:#c1c8aa;border-radius:12px;box-shadow:none}
+.farm-page.is-pixel .farm-board{position:relative;display:block}
+.farm-page.is-pixel .farm-field{padding-right:215px;background:#d1d8bc}
+.farm-page.is-pixel .farm-guide{position:absolute;right:12px;top:50px;bottom:45px;width:195px;overflow:auto;padding:13px 12px;border:1px solid #c8b99a;border-radius:12px;background:#faf5e5;gap:12px}
+.farm-page.is-pixel .farm-context{min-height:0}.farm-page.is-pixel .farm-context h2{font-size:18px}.farm-page.is-pixel .farm-context p{font-size:12px;line-height:1.6}
+.farm-page.is-pixel .farm-progress-goal{padding-top:10px}.farm-page.is-pixel .farm-expand-link{padding-top:9px}
+.farm-page.is-pixel .farm-world-nav{background:#faf5e5;flex-wrap:wrap;gap:3px}
+.farm-page.is-pixel .farm-world-nav button,.farm-page.is-pixel .farm-world-nav select{min-height:36px;font-size:13px;padding:5px 9px}
+.farm-page.is-pixel .farm-scene-head{padding:10px 14px 0}.farm-page.is-pixel .farm-scene-footer{padding:6px 12px 10px;gap:8px}
+.farm-page.is-pixel .farm-workbench{grid-template-columns:minmax(0,1fr) 215px}.farm-page.is-pixel .farm-seed{min-height:58px;min-width:118px}
+.farm-page.is-pixel .farm-seed .farm-sprite{width:30px;height:34px}.farm-page.is-pixel .farm-storage{padding:12px}.farm-page.is-pixel .farm-seed-bench{padding:10px 12px}
+[data-theme=dark] .farm-pixel-background{filter:saturate(.5) contrast(.85) brightness(.65)}
+[data-theme=dark] .farm-page.is-pixel .farm-guide,[data-theme=dark] .farm-page.is-pixel .farm-world-nav{background:#2c3b2c;border-color:#526148}
+@media(max-width:760px){
+ .farm-guardian-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .farm-map.farm-pixel{height:390px;max-height:56svh;min-height:310px}.farm-page.is-pixel .farm-field{padding-right:0}
+ .farm-page.is-pixel .farm-guide{position:static;width:auto;border:0;border-top:1px solid #c9cfb9;border-radius:0;padding:10px 12px;display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:7px 12px;max-height:none;overflow:visible}
+ .farm-page.is-pixel .farm-context{grid-column:1/-1}.farm-page.is-pixel .farm-context p{font-size:11px}.farm-page.is-pixel .farm-context h2{font-size:16px}
+ .farm-page.is-pixel .farm-world-nav{padding:5px}.farm-page.is-pixel .farm-world-nav button,.farm-page.is-pixel .farm-world-nav select{font-size:12px;padding:5px 7px}
+ .farm-page.is-pixel .farm-workbench{display:flex}.farm-page.is-pixel .farm-seed{min-width:0}.farm-page.is-pixel .farm-storage{padding:10px 12px}
+ .farm-page.is-pixel .farm-scene-footer>span{max-width:65%;line-height:1.5}
+}

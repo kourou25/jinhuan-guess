@@ -1,0 +1,33 @@
+import {ruleHelp,updateParticipants} from '/game-shell.js';
+import {installFundingNotice} from '/game-funding-notice.js';
+const h=(tag,props={},...children)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(props||{})){if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='class')e.className=v;else if(k==='disabled'||k==='checked')e[k]=!!v;else if(v!==null&&v!==undefined)e.setAttribute(k,v)}for(const child of children.flat(Infinity))if(child!==null&&child!==undefined&&child!==false)e.append(child instanceof Node?child:document.createTextNode(String(child)));return e};
+const api=async(path,options={})=>{const r=await fetch('/api'+path,{credentials:'same-origin',headers:{'content-type':'application/json'},...options,...(options.body?{body:JSON.stringify(options.body)}:{})});const data=await r.json();if(!r.ok)throw Error(data.error||'请求失败');return data};
+const button=(text,fn,props={})=>h('button',{type:'button',onclick:fn,...props},text),field=(label,node,help)=>h('label',{class:'game-field'},h('span',{},label),node,help&&h('small',{},help));
+const input=(label,props={})=>h('input',{'aria-label':label,...props}),select=(label,choices)=>h('select',{'aria-label':label},choices.map(([value,text])=>h('option',{value},text)));
+export function installGameNav(){
+ const nav=document.querySelector('.mainnav');if(nav){const old=nav.querySelector('[data-nav=chat]');if(old)old.textContent='普通猜词';nav.querySelectorAll('a[href="/games/arena"],a[href="/games/drawing"]').forEach(a=>a.remove())}
+ if(!document.querySelector('link[href="/shared-games/session.css"]'))document.head.append(h('link',{rel:'stylesheet',href:'/shared-games/session.css'}));
+ if(!document.querySelector('link[href="/game-app.css"]'))document.head.append(h('link',{rel:'stylesheet',href:'/game-app.css'}));
+}
+export async function mountGameApp(){
+ installGameNav();const main=document.querySelector('#main'),status=h('p',{role:'status',class:'game-status'});main.classList.add('game-app');main.replaceChildren(status);status.textContent='正在读取…';let me;
+ try{me=(await api('/me')).user}catch(e){status.textContent=e.message;return}
+ installFundingNotice(me?.id);
+ const actions=document.querySelector('#actions');actions.replaceChildren(h('a',{href:'/me/ai'},'个人AI'),h('a',{href:'https://jinhuan.example/me'},'个人中心'));
+ if(!me){main.replaceChildren(h('h1',{},'登录后参与游戏'),h('a',{class:'game-primary',href:'/auth/guess/start?next='+encodeURIComponent(location.pathname+location.search)},'前往登录'));return}
+ if(location.pathname==='/me/ai')return personal(main);
+ if(location.pathname==='/games/review')return review(main);
+ main.replaceChildren(h('p',{role:'status'},'此玩法已下线'),h('a',{href:'/chat/1'},'返回普通猜词'));
+}
+async function personal(main){const status=h('p',{role:'status'}),form=h('form',{class:'game-settings'}),name=input('模型名称',{maxlength:40,required:true}),base=input('Base URL',{type:'url',required:true,placeholder:'https://api.example.com/v1'}),key=input('API Key',{type:'password',autocomplete:'new-password',maxlength:512}),model=input('模型 ID',{maxlength:100,required:true}),prompt=h('textarea',{'aria-label':'自定义提示词',rows:6,maxlength:4000}),enabled=input('启用个人AI',{type:'checkbox',checked:true}),save=h('button',{type:'submit',class:'game-primary'},'保存配置');let revision=null;
+ const remove=button('删除模型与密钥',async()=>{if(!revision)return;remove.disabled=true;try{await api('/me/guess-ai',{method:'DELETE',body:{revision}});revision=null;key.value='';key.placeholder='请输入密钥';status.textContent='配置与密钥已删除，现有调用授权已停止'}catch(e){status.textContent=e.message}finally{remove.disabled=false}},{class:'game-danger'});
+ form.append(h('h1',{},'个人AI'),field('模型名称',name),field('Base URL',base),field('API Key',key,'密钥加密保存在服务端，读取时不会回显；更换地址需重填'),field('模型 ID',model),field('自定义提示词',prompt,'仅用于指挥你参与猜词的AI，不用于站点其他任务'),field('启用',enabled),h('p',{},'AI对抗已下线，当前不会调用个人模型。已保存的配置与密钥可在此管理或删除。'),h('div',{class:'game-actions'},save,remove),status);main.replaceChildren(form);
+ try{const data=await api('/me/guess-ai'),c=data.config;if(c){revision=c.revision;name.value=c.name;base.value=c.base;model.value=c.model;prompt.value=c.prompt;enabled.checked=c.enabled;key.placeholder=c.has_key?'已保存；留空保留原密钥':''}status.textContent=''}catch(e){status.textContent=e.message}
+ form.onsubmit=async e=>{e.preventDefault();save.disabled=true;status.textContent='正在保存…';try{const r=await api('/me/guess-ai',{method:'PUT',body:{revision,name:name.value.trim(),base:base.value.trim(),key:key.value,model:model.value.trim(),prompt:prompt.value,enabled:enabled.checked}});revision=r.config.revision;key.value='';key.placeholder='已保存；留空保留原密钥';status.textContent='已保存；只在你授权参与的猜词中使用'}catch(e){status.textContent=e.message}finally{save.disabled=false}};
+}
+async function review(main){const status=h('p',{role:'status'},'正在读取…'),rules=h('div'),samples=h('div'),form=h('form',{class:'game-settings'}),pattern=input('新增禁用发言模板',{minlength:6,maxlength:40,required:true}),submit=h('button',{type:'submit'},'加入禁用模板');main.replaceChildren(h('h1',{},'AI发言人工复核'),status);
+ try{const d=await api('/admin/guess-ai-signals');status.textContent=d.notice;main.append(h('h2',{},'AI对抗赛禁用模板'),h('p',{},'仅限制对抗赛后续发言。普通猜词只向管理员提示命中记录，不自动处罚。'),form,rules,h('h2',{},'已标注的AI发言样本'),samples);form.append(field('模板内容',pattern,'6–40字；记录中反复出现的表达，由管理员复核后添加'),submit);
+ function render(values){rules.replaceChildren(...values.map(text=>h('p',{},text,' ',button('移除',async()=>{try{const r=await api('/admin/guess-ai-signals',{method:'POST',body:{pattern:text,remove:true}});render(r.rules);status.textContent='模板已移除'}catch(e){status.textContent=e.message}}))));if(!values.length)rules.append(h('p',{},'暂无禁用模板'))}render(d.rules);
+ form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;try{const r=await api('/admin/guess-ai-signals',{method:'POST',body:{pattern:pattern.value}});render(r.rules);pattern.value='';status.textContent='模板已加入，下次模型行动起生效'}catch(e){status.textContent=e.message}finally{submit.disabled=false}};
+ const prefixes=new Map();for(const r of d.items){let features;try{features=JSON.parse(r.features)}catch{continue}const value=features.prefix;if(value?.length>=6)prefixes.set(value,(prefixes.get(value)||0)+1)}for(const [value,n]of prefixes)if(n>=2)samples.append(h('p',{},'重复开头 '+n+'/'+d.items.length+'：'+value,' ',button('填写此模板',()=>{pattern.value=value;pattern.focus()})));
+ for(const r of d.items)samples.append(h('article',{class:'game-review'},h('strong',{},r.model+' · 玩家'+r.user_id),h('p',{},r.body),h('small',{},r.task+' · 特征 '+r.features+' · 提示词版本 '+r.prompt_hash.slice(0,12)+' · '+new Date(r.created_at*1000).toLocaleString('zh-CN'))));if(!d.items.length)samples.append(h('p',{},'暂无已标注的AI对抗发言样本'))}catch(e){status.textContent=e.message}}

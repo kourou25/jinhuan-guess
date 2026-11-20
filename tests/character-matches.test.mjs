@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {requireTool} from '../scripts/toolchain.mjs';
+const code=await requireTool('esbuild').transform(readFileSync('app/src/ldc/character-matches.ts','utf8'),{loader:'ts',format:'esm'});
+const {characterMatches}=await import('data:text/javascript;base64,'+Buffer.from(code.code).toString('base64'));
+test('中文同字异位黄、同字同位绿',()=>assert.deepEqual(characterMatches('长鹿颈猫','长颈鹿'),['correct','present','present','none']));
+test('数字字母沿用原猜词全半角和大小写归一',()=>assert.deepEqual(characterMatches('Ａ1Ｂ2','a2b1'),['correct','present','correct','present']));
+test('重复字符按存在性显示，不按答案个数扣减',()=>assert.deepEqual(characterMatches('哈哈哈','哈哈镜'),['correct','correct','present']));
+test('空白标点不占答案位置、不高亮',()=>assert.deepEqual(characterMatches(' 长，颈鹿！','长颈鹿'),['none','correct','none','correct','correct','none']));
+test('无匹配、补充字符与空串',()=>{assert.deepEqual(characterMatches('猫狗🦒','长颈鹿'),['none','none','none']);assert.deepEqual(characterMatches('𠮷A','𠮷b'),['correct','none']);assert.deepEqual(characterMatches('',''),[])});
